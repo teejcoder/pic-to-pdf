@@ -42,17 +42,8 @@ const CameraScreen = () => {
       }
     };
   
-    const convertToPDF = async () => {
-      if (capturedImage) {
-        const options = {
-          html: `<img src="${capturedImage.uri}" style="width:100%;" />`,
-        };
-        const pdf = await Print.printToFileAsync(options);
-        return pdf.uri;
-      }
-    };
-  
     const sharePDF = async () => {
+
       if (capturedImage) {
         const pdfUri = await convertToPDF();
         if (pdfUri) {
@@ -76,10 +67,10 @@ const CameraScreen = () => {
     }
     
   return (
-    <View style={styles.container}>
+    <View style={styles.camera}>
     {capturedImage ? (
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 20 }}>Image Captured!</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 20, flex: 2 }}>Image Captured!</Text>
 
         {/* SAVE TO CAMERA ROLL BUTTON */}
         <Pressable onPress={saveToCameraRoll} style={styles.button}>
@@ -98,11 +89,13 @@ const CameraScreen = () => {
       </View>
     ) : (
         <Camera             
-            style={styles.captureButtonContainer}
-            type={Camera.Constants.Type.back}
-            ref={(ref) => setCamera(ref)}
+          style={styles.captureButtonContainer}
+          type={Camera.Constants.Type.back}
+          ref={(ref) => setCamera(ref)}
         >
-            <Pressable onPress={takePicture} style={styles.captureButton} />
+          <Pressable onPress={takePicture} style={styles.captureButton}>
+            <Text>+</Text>
+          </Pressable>
         </Camera>
     )}
   </View>

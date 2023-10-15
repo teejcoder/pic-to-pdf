@@ -7,28 +7,37 @@ export const styles = StyleSheet.create({
       justifyContent: 'space-around',
       alignItems: 'center',
     },
+    camera: {
+      flex: 1,
+    }, 
     captureButtonContainer: {
       backgroundColor: 'transparent',
       flex: 1,
       display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'column',
+      justifyContent: 'flex-end',
+      paddingBottom: 50,
     },
     captureButton: {
+      justifyContent: 'center',
+      alignItems: 'center',
       backgroundColor: '#fff',
       borderRadius: 50,
       padding: 20,
-      paddingHorizontal: 30,
-      alignSelf: 'flex-end',
-      marginBottom: 20,
+      width: 80,
+      height: 80,
     },
     button: {
+      width: 250,
+      height: 50,
       padding: 10,
       margin: 10,
       backgroundColor: 'cyan',
-      borderRadius: 5,
+      borderRadius: 25,
       borderColor: 'black',
       alignItems: 'center',
+      justifyContent: 'center'
     },
   });
   
