@@ -7,9 +7,6 @@ export const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
     },
-    camera: {
-      flex: 1,
-    }, 
     captureButtonContainer: {
       backgroundColor: 'transparent',
       flex: 1,
@@ -27,6 +24,12 @@ export const styles = StyleSheet.create({
       padding: 20,
       width: 80,
       height: 80,
+    },
+    buttonContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      backgroundColor: 'transparent',
+      margin: 64,
     },
     button: {
       width: 250,

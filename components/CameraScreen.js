@@ -1,11 +1,30 @@
 import { Camera, CameraType } from 'expo-camera';
 import { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { styles } from '../app.style';
+
 
 export default function CameraScreen() {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [capturedImage, setCapturedImage] = useState('')
+
+  
+  const takePicture = async () => {
+
+      const photo = await camera.takePictureAsync();
+
+      const croppedImage = await ImageManipulator.manipulateAsync(
+        photo.uri,
+        [{ crop: { originX: 0, originY: 0, width: 'auto', height: 'auto' } }],
+        { compress: 1, format: ImageManipulator.SaveFormat.PDF }
+      );
+      setCapturedImage(croppedImage);
+  };
+
+  const toggleCameraType = () => {
+    setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+  }
 
   useEffect(() => {
     requestPermission();
@@ -17,24 +36,23 @@ export default function CameraScreen() {
 
   if (permission && permission.granted) {
     return (
-      <View style={styles.container}>
-        <Camera style={styles.camera} type={type}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-              <Text style={styles.text}>Flip Camera</Text>
-            </TouchableOpacity>
-          </View>
+        <Camera style={styles.container} type={type}>
+
+          <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
+            <Text style={styles.text}>Flip Camera</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.button} onPress={takePicture}>
+            <Text style={styles.text}>Take Picture</Text>
+          </TouchableOpacity>
         </Camera>
-      </View>
     );
   } else {
     return <Text>Camera permission not granted.</Text>;
   }
 }
 
-function toggleCameraType() {
-  setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
-}
+
 
 
 // import React, { useEffect, useState } from 'react'
