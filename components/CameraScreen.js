@@ -4,11 +4,11 @@ import {
   Dimensions,
   View,
   Text,
-  TouchableOpacity,
   SafeAreaView,
   Button,
   Share,
   Image,
+  Pressable,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -47,22 +47,12 @@ export default function CameraScreen() {
       if (source) {
         await cameraRef.current.pausePreview();
   
-        // Crop the captured image
-        const croppedImageUri = await cropPicture(data.uri, {
-          originX: 0,
-          originY: 0,
-          width: data.width,
-          height: data.height,
-        });
-  
-        // Set the cropped image as the captured image
-        setCapturedImage({ uri: croppedImageUri });
-  
         setIsPreview(true);
         console.log("picture source", source);
       }
     }
   };
+
   const cropPicture = async (imageUri, cropData) => {
     try {
       const manipulatedImage = await ImageManipulator.manipulateAsync(
@@ -70,7 +60,6 @@ export default function CameraScreen() {
         [{ crop: cropData }], // Specify the cropping data
         { compress: 1, format: ImageManipulator.SaveFormat.PDF } // You can choose the format you prefer
       );
-  
       // `manipulatedImage.uri` now contains the cropped image URI
       return manipulatedImage.uri;
     } catch (error) {
@@ -117,7 +106,6 @@ export default function CameraScreen() {
     }
   };
 
-
   const switchCamera = () => {
     if (isPreview) {
       return;
@@ -135,33 +123,35 @@ export default function CameraScreen() {
   };
 
   const renderCancelPreviewButton = () => (
-    <TouchableOpacity onPress={cancelPreview} style={styles.closeButton}>
+    <Pressable onPress={cancelPreview} style={styles.closeButton}>
       <View style={[styles.closeCross, { transform: [{ rotate: "45deg" }] }]} />
       <View
         style={[styles.closeCross, { transform: [{ rotate: "-45deg" }] }]}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 
-  const renderCropButton = () => {
-    <TouchableOpacity onPress={cropPicture} style={styles.cropButton}>
-      <Text>Crop</Text>
-  </TouchableOpacity>
-  };
-
-  const renderShareButton = () => {
-    <TouchableOpacity onPress={shareImage} style={styles.shareButton}>
-      <Text>Share</Text>
-  </TouchableOpacity>
-  };
-
+  const renderCropButton = () => (
+    <Pressable
+      onPress={() => alert('crop button pressed')}
+      style={styles.cropButton}
+    >
+    </Pressable>
+  );
+  
+  const renderShareButton = () => (
+    <Pressable 
+      onPress={() => alert('share button pressed!')}
+      style={styles.shareButton}>
+    </Pressable>
+  );
 
   const renderCaptureControl = () => (
     <View style={styles.control}>
-      <TouchableOpacity disabled={!isCameraReady} onPress={switchCamera}>
+      <Pressable disabled={!isCameraReady} onPress={switchCamera}>
         <Text style={styles.text}>{"Flip"}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         activeOpacity={0.7}
         disabled={!isCameraReady}
         onPress={takePicture}
@@ -190,12 +180,16 @@ export default function CameraScreen() {
         }}
       />
       {isPreview && renderCancelPreviewButton()}
-      {isPreview && renderCropButton()}
+
       {isPreview ? (
       <Image source={{ uri: isPreview.uri }} style={styles.media} />
         ) : (
         !isPreview && renderCaptureControl()
       )}
+      <View style={styles.buttonContainer}>
+        {isPreview && renderCropButton()}
+        {isPreview && renderShareButton()}
+      </View>
     </SafeAreaView>
   );
 }
@@ -203,6 +197,9 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center'
   },
   closeButton: {
     position: "absolute",
@@ -226,28 +223,27 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
   },
   buttonContainer: {
-    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: 'transparent',
-    margin: 64,
+    margin: 16,
   },
   cropButton: {
     height: captureSize,
     width: captureSize,
     borderRadius: Math.floor(captureSize / 2),
     marginHorizontal: 31,
-    backgroundColor: 'lime',
+    backgroundColor: 'cyan',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   shareButton: {
     height: captureSize,
     width: captureSize,
     borderRadius: Math.floor(captureSize / 2),
     marginHorizontal: 31,
-    backgroundColor: 'cyan',
+    backgroundColor: 'lime',
     justifyContent: 'center',
     alignItems: 'center',
   },
