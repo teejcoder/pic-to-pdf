@@ -83,8 +83,7 @@ export default function CameraScreen() {
   const shareImage = async () => {
     try {
       if (!capturedImage) {
-        // Handle the case where there is no captured image
-        return;
+        alert('no captured image (line 86)')
       }
 
       // Convert the captured image to a PDF
@@ -147,6 +146,12 @@ export default function CameraScreen() {
   const renderCropButton = () => {
     <TouchableOpacity onPress={cropPicture} style={styles.cropButton}>
       <Text>Crop</Text>
+  </TouchableOpacity>
+  };
+
+  const renderShareButton = () => {
+    <TouchableOpacity onPress={shareImage} style={styles.shareButton}>
+      <Text>Share</Text>
   </TouchableOpacity>
   };
 
