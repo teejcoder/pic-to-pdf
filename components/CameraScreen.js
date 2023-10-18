@@ -17,8 +17,6 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 
-
-
 const WINDOW_HEIGHT = Dimensions.get("window").height;
 
 const closeButtonSize = Math.floor(WINDOW_HEIGHT * 0.032);
@@ -43,7 +41,72 @@ export default function CameraScreen() {
     setIsCameraReady(true);
   };
 
+  const renderCaptureControl = () => (
+    <View style={styles.control}>
+      <Pressable disabled={!isCameraReady} onPress={switchCamera} style={styles.flipCamera}>
+          <MaterialIcons name="flip-camera-ios" size={24} color="white" />
+      </Pressable>
+      <Pressable
+        activeOpacity={0.7}
+        disabled={!isCameraReady}
+        onPress={takePicture}
+        style={styles.capture}
+      />
+    </View>
+  );
+  if (hasPermission === null) {
+    return <View />;
+  }
+
+  if (hasPermission === false) {
+    return <Text style={styles.text}>No access to camera</Text>;
+  }
+
+  const switchCamera = () => {
+    if (isPreview) {
+      return;
+    }
+    setCameraType((prevCameraType) =>
+      prevCameraType === Camera.Constants.Type.back
+        ? Camera.Constants.Type.front
+        : Camera.Constants.Type.back
+    );
+  };
+
+  const cancelPreview = async () => {
+    await cameraRef.current.resumePreview();
+    setIsPreview(false);
+  };
+
+  const renderCancelPreviewButton = () => (
+    <Pressable onPress={cancelPreview} style={styles.closeButton}>
+      <View style={[styles.closeCross, { transform: [{ rotate: "45deg" }] }]} />
+      <View
+        style={[styles.closeCross, { transform: [{ rotate: "-45deg" }] }]}
+      />
+    </Pressable>
+  );
+
+  const renderCropButton = () => (
+    <Pressable
+      onPress={cropPicture}
+      style={styles.cropButton}
+    >
+      <Feather name="crop" size={24} color="black" />
+    </Pressable>
+  );
+  
+  const renderShareButton = () => (
+    <Pressable 
+      onPress={() => alert('Share button pressed!')}
+      style={styles.shareButton}
+    >
+      <Feather name="share" size={24} color="black" />
+    </Pressable>
+  );
+
   const takePicture = async () => {
+
     if (cameraRef.current) {
       const options = { quality: 0.5, base64: true, skipProcessing: true };
       const data = await cameraRef.current.takePictureAsync(options);
@@ -56,22 +119,21 @@ export default function CameraScreen() {
     }
   };
 
-  const cropPicture = async (imageUri, cropData) => {
+  // problem with cropPicture here - Error cropping image: [TypeError: The "uri" argument must be a string]
+  const cropPicture = async ({imageUri, cropData}) => {
     try {
-      console.log(imageUri)
       const manipulatedImage = await ImageManipulator.manipulateAsync(
         imageUri,
         [{ crop: cropData }], // Specify the cropping data
-        { compress: 1, format: ImageManipulator.SaveFormat.PDF } // You can choose the format you prefer
+        { compress: 1, format: ImageManipulator.SaveFormat.PNG } // You can choose the format you prefer
       );
       // `manipulatedImage.uri` now contains the cropped image URI
       return manipulatedImage.uri;
     } catch (error) {
       console.error('Error cropping image:', error);
-      throw error;
+      console.log('error in imageUri', imageUri)
     }
   };
-  
 
   const shareImage = async () => {
     try {
@@ -109,71 +171,6 @@ export default function CameraScreen() {
       alert(error.message);
     }
   };
-
-  const switchCamera = () => {
-    if (isPreview) {
-      return;
-    }
-    setCameraType((prevCameraType) =>
-      prevCameraType === Camera.Constants.Type.back
-        ? Camera.Constants.Type.front
-        : Camera.Constants.Type.back
-    );
-  };
-
-  const cancelPreview = async () => {
-    await cameraRef.current.resumePreview();
-    setIsPreview(false);
-  };
-
-  const renderCancelPreviewButton = () => (
-    <Pressable onPress={cancelPreview} style={styles.closeButton}>
-      <View style={[styles.closeCross, { transform: [{ rotate: "45deg" }] }]} />
-      <View
-        style={[styles.closeCross, { transform: [{ rotate: "-45deg" }] }]}
-      />
-    </Pressable>
-  );
-
-  const renderCropButton = () => (
-    <Pressable
-      onPress={() => alert('Crop button pressed!')}
-      style={styles.cropButton}
-    >
-      <Feather name="crop" size={24} color="black" />
-    </Pressable>
-  );
-  
-  const renderShareButton = () => (
-    <Pressable 
-      onPress={() => alert('Share button pressed!')}
-      style={styles.shareButton}
-    >
-        <Feather name="share" size={24} color="black" />
-    </Pressable>
-  );
-
-  const renderCaptureControl = () => (
-    <View style={styles.control}>
-      <Pressable disabled={!isCameraReady} onPress={switchCamera} style={styles.flipCamera}>
-          <MaterialIcons name="flip-camera-ios" size={24} color="white" />
-      </Pressable>
-      <Pressable
-        activeOpacity={0.7}
-        disabled={!isCameraReady}
-        onPress={takePicture}
-        style={styles.capture}
-      />
-    </View>
-  );
-
-  if (hasPermission === null) {
-    return <View />;
-  }
-
-  if (hasPermission === false) {
-    return <Text style={styles.text}>No access to camera</Text>;
-  }
 
   return (
     <SafeAreaView style={styles.container}>
