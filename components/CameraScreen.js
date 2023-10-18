@@ -5,15 +5,19 @@ import {
   View,
   Text,
   SafeAreaView,
-  Button,
   Share,
   Image,
   Pressable,
 } from "react-native";
 import { Camera } from "expo-camera";
+import { Feather } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons'; 
+
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
+
+
 
 const WINDOW_HEIGHT = Dimensions.get("window").height;
 
@@ -46,7 +50,6 @@ export default function CameraScreen() {
       const source = data.uri;
       if (source) {
         await cameraRef.current.pausePreview();
-  
         setIsPreview(true);
         console.log("picture source", source);
       }
@@ -55,6 +58,7 @@ export default function CameraScreen() {
 
   const cropPicture = async (imageUri, cropData) => {
     try {
+      console.log(imageUri)
       const manipulatedImage = await ImageManipulator.manipulateAsync(
         imageUri,
         [{ crop: cropData }], // Specify the cropping data
@@ -133,23 +137,26 @@ export default function CameraScreen() {
 
   const renderCropButton = () => (
     <Pressable
-      onPress={() => alert('crop button pressed')}
+      onPress={() => alert('Crop button pressed!')}
       style={styles.cropButton}
     >
+      <Feather name="crop" size={24} color="black" />
     </Pressable>
   );
   
   const renderShareButton = () => (
     <Pressable 
-      onPress={() => alert('share button pressed!')}
-      style={styles.shareButton}>
+      onPress={() => alert('Share button pressed!')}
+      style={styles.shareButton}
+    >
+        <Feather name="share" size={24} color="black" />
     </Pressable>
   );
 
   const renderCaptureControl = () => (
     <View style={styles.control}>
-      <Pressable disabled={!isCameraReady} onPress={switchCamera}>
-        <Text style={styles.text}>{"Flip"}</Text>
+      <Pressable disabled={!isCameraReady} onPress={switchCamera} style={styles.flipCamera}>
+          <MaterialIcons name="flip-camera-ios" size={24} color="white" />
       </Pressable>
       <Pressable
         activeOpacity={0.7}
@@ -257,11 +264,22 @@ const styles = StyleSheet.create({
   },
   capture: {
     backgroundColor: "#f5f6f5",
-    borderRadius: 5,
-    height: captureSize,
-    width: captureSize,
     borderRadius: Math.floor(captureSize / 2),
-    marginHorizontal: 31,
+    width: captureSize,
+    height: captureSize,
+    position: "absolute",
+    bottom: 16,
+    alignSelf: "center",
+  },
+  flipCamera: {
+    alignSelf: "left",
+    position: "absolute",
+    left: 50, // Adjust this value to control the distance from the left
+    bottom: 30, // Adjust this value to control the distance from the bottom
+    padding: 10,
+    borderWidth: 2,
+    borderColor: "white", // Change this to your desired border color
+    borderRadius: Math.floor(captureSize / 2),
   },
   recordIndicatorContainer: {
     flexDirection: "row",
@@ -287,6 +305,5 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "#000",
-
   },
 });
