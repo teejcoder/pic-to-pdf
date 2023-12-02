@@ -16,6 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
+import { shareAsync } from 'expo-sharing';
 
 const WINDOW_HEIGHT = Dimensions.get("window").height;
 
@@ -57,7 +58,6 @@ export default function CameraScreen() {
   if (hasPermission === null) {
     return <View />;
   }
-
   if (hasPermission === false) {
     return <Text style={styles.text}>No access to camera</Text>;
   }
@@ -89,7 +89,7 @@ export default function CameraScreen() {
 
   const renderCropButton = () => (
     <Pressable
-      onPress={() => alert('crop button presed!')}
+      onPress={() => cropPicture()}
       style={styles.cropButton}
     >
       <Feather name="crop" size={24} color="black" />
@@ -107,18 +107,15 @@ export default function CameraScreen() {
 
   const takePicture = async () => {
     if (cameraRef.current) {
-      const options = { quality: 0.5, base64: true, skipProcessing: true };
+      const options = { quality: 1, base64: true, skipProcessing: true };
       const data = await cameraRef.current.takePictureAsync(options);
       const source = data.uri;
   
       if (source) {
         await cameraRef.current.pausePreview();
         setIsPreview(true);
-  
         try {
-  
-          // Set the cropped image URI in state
-          setCapturedImage({ uri: capturedImage });
+          setCapturedImage(source);
         } catch (error) {
           console.error('Error cropping image:', error);
         }
@@ -149,21 +146,11 @@ export default function CameraScreen() {
         return;
       }
   
-      // Convert the captured image to a PDF
-      const pdfName = 'isPreview.pdf';
-      const pdfPath = `${FileSystem.cacheDirectory}${pdfName}`;
-  
-      const { uri } = capturedImage;
-      const htmlContent = `<html><body><img src="${uri}" /></body></html>`;
-      const options = { html: htmlContent, width: 595, height: 842 }; // PDF dimensions (A4)
-  
-      const { uri: pdfUri } = await Print.printToFileAsync(options, pdfPath);
-  
-      // Share the PDF
-      const result = await Share.share({
-        url: pdfUri,
+      // Share the image to Facebook
+      const result = await Share.shareAsync({
+        url: capturedImage,
         title: 'Pic to PDF',
-        message: 'Take a picture -> export to PDF',
+        mimeType: 'image/jpeg', // Adjust the mimeType based on your image type
       });
   
       if (result.action === Share.sharedAction) {
@@ -175,10 +162,14 @@ export default function CameraScreen() {
       } else if (result.action === Share.dismissedAction) {
         // Dismissed
       }
+  
+      // Reset capturedImage state after sharing
+      setCapturedImage(null);
     } catch (error) {
       alert(error.message);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>
