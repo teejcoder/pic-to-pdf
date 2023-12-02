@@ -89,7 +89,7 @@ export default function CameraScreen() {
 
   const renderCropButton = () => (
     <Pressable
-      onPress={cropPicture}
+      onPress={() => alert('crop button presed!')}
       style={styles.cropButton}
     >
       <Feather name="crop" size={24} color="black" />
@@ -98,7 +98,7 @@ export default function CameraScreen() {
   
   const renderShareButton = () => (
     <Pressable 
-      onPress={() => alert('Share button pressed!')}
+      onPress={() => shareImage()}
       style={styles.shareButton}
     >
       <Feather name="share" size={24} color="black" />
@@ -106,15 +106,22 @@ export default function CameraScreen() {
   );
 
   const takePicture = async () => {
-
     if (cameraRef.current) {
       const options = { quality: 0.5, base64: true, skipProcessing: true };
       const data = await cameraRef.current.takePictureAsync(options);
       const source = data.uri;
+  
       if (source) {
         await cameraRef.current.pausePreview();
         setIsPreview(true);
-        console.log("picture source", source);
+  
+        try {
+  
+          // Set the cropped image URI in state
+          setCapturedImage({ uri: capturedImage });
+        } catch (error) {
+          console.error('Error cropping image:', error);
+        }
       }
     }
   };
@@ -123,7 +130,7 @@ export default function CameraScreen() {
   const cropPicture = async ({imageUri, cropData}) => {
     try {
       const manipulatedImage = await ImageManipulator.manipulateAsync(
-        imageUri,
+        capturedImage,
         [{ crop: cropData }], // Specify the cropping data
         { compress: 1, format: ImageManipulator.SaveFormat.PNG } // You can choose the format you prefer
       );
@@ -138,26 +145,27 @@ export default function CameraScreen() {
   const shareImage = async () => {
     try {
       if (!capturedImage) {
-        alert('no captured image (line 86)')
+        alert('No captured image');
+        return;
       }
-
+  
       // Convert the captured image to a PDF
       const pdfName = 'isPreview.pdf';
       const pdfPath = `${FileSystem.cacheDirectory}${pdfName}`;
-
+  
       const { uri } = capturedImage;
       const htmlContent = `<html><body><img src="${uri}" /></body></html>`;
       const options = { html: htmlContent, width: 595, height: 842 }; // PDF dimensions (A4)
-
+  
       const { uri: pdfUri } = await Print.printToFileAsync(options, pdfPath);
-
+  
       // Share the PDF
       const result = await Share.share({
         url: pdfUri,
         title: 'Pic to PDF',
-        message: 'Take a picture -> export to PDF instantly',
+        message: 'Take a picture -> export to PDF',
       });
-
+  
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
           // Shared with an activity type of result.activityType
