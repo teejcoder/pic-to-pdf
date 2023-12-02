@@ -145,31 +145,14 @@ export default function CameraScreen() {
         alert('No captured image');
         return;
       }
-  
-      // Share the image to Facebook
-      const result = await Share.shareAsync({
-        url: capturedImage,
-        title: 'Pic to PDF',
-        mimeType: 'image/jpeg', // Adjust the mimeType based on your image type
+      shareAsync(capturedImage).then(() => {
+        setCapturedImage(undefined);
       });
-  
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // Shared with an activity type of result.activityType
-        } else {
-          // Shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // Dismissed
-      }
-  
-      // Reset capturedImage state after sharing
-      setCapturedImage(null);
+
     } catch (error) {
       alert(error.message);
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.container}>
